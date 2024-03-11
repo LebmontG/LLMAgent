@@ -2,20 +2,13 @@ import torch
 import keras
 import keras_nlp
 import os
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModel
 
-# pip install accelerate
-os.environ["HF_TOKEN"] = 'insert your token'
-access_token = 'your token'
-
-tokenizer = AutoTokenizer.from_pretrained("google/gemma-2b", token = access_token)
-model = AutoModelForCausalLM.from_pretrained("google/gemma-2b", token = access_token)"
-
-tokenizer = AutoTokenizer.from_pretrained("google/gemma-7b-it")
-model = AutoModelForCausalLM.from_pretrained("google/gemma-7b-it", device_map="auto")
-
-input_text = "Write me a poem about Machine Learning."
-input_ids = tokenizer(input_text, return_tensors="pt").to("cuda")
-
-outputs = model.generate(**input_ids)
-print(tokenizer.decode(outputs[0]))
+prompt = "The best recipe for pasta is" 
+checkpoint = "models/Qwen/" 
+tokenizer = AutoTokenizer.from_pretrained(checkpoint) 
+model = AutoModelForCausalLM.from_pretrained(checkpoint, torch_dtype=torch.float16, device_map="cuda") 
+inputs = tokenizer(prompt, return_tensors="pt").to('cuda') 
+outputs = model.generate(**inputs, do_sample=True, max_new_tokens=150) 
+result = tokenizer.decode(outputs[0], skip_special_tokens=True) 
+print(result)
